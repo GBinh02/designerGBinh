@@ -1,15 +1,17 @@
-import React, { useState, useEffect } from 'react';
-import { ChevronRight, Camera, Image } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { ChevronRight, ChevronLeft, Camera, Image } from 'lucide-react';
 
 const PhotoGallery = ({ onNext }) => {
   const [currentPhoto, setCurrentPhoto] = useState(0);
-  const [isAnimating, setIsAnimating] = useState(true);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [touchStart, setTouchStart] = useState(0);
+  const [touchEnd, setTouchEnd] = useState(0);
+  const containerRef = useRef(null);
 
   // Danh sách ảnh - sử dụng đường dẫn tương đối cho GitHub Pages
   const photos = [
     {
-      src: './images/photo1.jpg', // Đường dẫn tương đối
+      src: './images/photo1.jpg',
       caption: 'Những khoảnh khắc đẹp đẽ',
       bg: 'from-rose-400 to-pink-600',
       icon: '🌟'
@@ -28,20 +30,74 @@ const PhotoGallery = ({ onNext }) => {
     }
   ];
 
-  // Auto slide
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentPhoto((prev) => (prev + 1) % photos.length);
-    }, 3000);
-    return () => clearInterval(timer);
-  }, [photos.length]);
+  // Minimum swipe distance (in px)
+  const minSwipeDistance = 50;
 
-  // Animation trigger
-  useEffect(() => {
-    setIsAnimating(false);
-    const timer = setTimeout(() => setIsAnimating(true), 50);
-    return () => clearTimeout(timer);
-  }, [currentPhoto]);
+  const handleTouchStart = (e) => {
+    setTouchEnd(0);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchMove = (e) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+
+    if (isLeftSwipe && currentPhoto < photos.length - 1) {
+      setCurrentPhoto(prev => prev + 1);
+    }
+    if (isRightSwipe && currentPhoto > 0) {
+      setCurrentPhoto(prev => prev - 1);
+    }
+  };
+
+  // Mouse drag for desktop
+  const handleMouseDown = (e) => {
+    setTouchStart(e.clientX);
+    containerRef.current.style.cursor = 'grabbing';
+  };
+
+  const handleMouseMove = (e) => {
+    if (touchStart === 0) return;
+    setTouchEnd(e.clientX);
+  };
+
+  const handleMouseUp = () => {
+    if (touchStart === 0) return;
+    
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+
+    if (isLeftSwipe && currentPhoto < photos.length - 1) {
+      setCurrentPhoto(prev => prev + 1);
+    }
+    if (isRightSwipe && currentPhoto > 0) {
+      setCurrentPhoto(prev => prev - 1);
+    }
+
+    setTouchStart(0);
+    setTouchEnd(0);
+    containerRef.current.style.cursor = 'grab';
+  };
+
+  const handlePrevious = () => {
+    if (currentPhoto > 0) {
+      setCurrentPhoto(prev => prev - 1);
+    }
+  };
+
+  const handleNextPhoto = () => {
+    if (currentPhoto < photos.length - 1) {
+      setCurrentPhoto(prev => prev + 1);
+    }
+  };
 
   const handleDotClick = (index) => {
     setCurrentPhoto(index);
@@ -76,28 +132,38 @@ const PhotoGallery = ({ onNext }) => {
       </div>
 
       <div className="relative w-full max-w-4xl px-4 md:px-8">
-        {/* Photo container */}
-        <div className="relative h-[400px] sm:h-[500px] md:h-[550px] mb-6 md:mb-8">
+        {/* Photo container with swipe support */}
+        <div 
+          ref={containerRef}
+          className="relative h-[400px] sm:h-[500px] md:h-[550px] mb-6 md:mb-8 cursor-grab active:cursor-grabbing select-none"
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
+          onMouseLeave={handleMouseUp}
+        >
           {photos.map((photo, index) => (
             <div
               key={index}
-              className={`absolute inset-0 transition-all duration-1000 ease-out ${
+              className={`absolute inset-0 transition-all duration-500 ease-out ${
                 index === currentPhoto
-                  ? 'opacity-100 scale-100 rotate-0 z-10'
+                  ? 'opacity-100 scale-100 translate-x-0 z-10'
                   : index < currentPhoto
-                  ? 'opacity-0 scale-75 -rotate-12 z-0'
-                  : 'opacity-0 scale-75 rotate-12 z-0'
+                  ? 'opacity-0 scale-95 -translate-x-full z-0'
+                  : 'opacity-0 scale-95 translate-x-full z-0'
               }`}
             >
               {/* Photo card */}
               <div className={`relative bg-gradient-to-br ${photo.bg} rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden h-full p-3 sm:p-4 transform hover:scale-105 transition-transform duration-300`}>
                 {/* Image placeholder with icon */}
                 <div className="w-full h-full bg-white/20 backdrop-blur-sm rounded-xl sm:rounded-2xl flex flex-col items-center justify-center border-2 sm:border-4 border-white/50">
-                  {/* Try to load image, fallback to icon */}
                   <img
                     src={photo.src}
                     alt={photo.caption}
-                    className="w-full h-full object-cover rounded-xl sm:rounded-2xl"
+                    className="w-full h-full object-cover rounded-xl sm:rounded-2xl pointer-events-none"
+                    draggable="false"
                     onError={(e) => {
                       e.target.style.display = 'none';
                       e.target.nextSibling.style.display = 'flex';
@@ -126,6 +192,32 @@ const PhotoGallery = ({ onNext }) => {
               </div>
             </div>
           ))}
+
+          {/* Navigation arrows */}
+          {currentPhoto > 0 && (
+            <button
+              onClick={handlePrevious}
+              className="absolute left-2 sm:left-4 top-1/2 transform -translate-y-1/2 z-20 w-12 h-12 sm:w-14 sm:h-14 bg-white/90 hover:bg-white rounded-full shadow-lg flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95"
+            >
+              <ChevronLeft className="text-purple-600" size={28} />
+            </button>
+          )}
+
+          {currentPhoto < photos.length - 1 && (
+            <button
+              onClick={handleNextPhoto}
+              className="absolute right-2 sm:right-4 top-1/2 transform -translate-y-1/2 z-20 w-12 h-12 sm:w-14 sm:h-14 bg-white/90 hover:bg-white rounded-full shadow-lg flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95"
+            >
+              <ChevronRight className="text-purple-600" size={28} />
+            </button>
+          )}
+        </div>
+
+        {/* Swipe hint */}
+        <div className="text-center mb-4 sm:mb-6">
+          <p className="text-white/60 text-sm sm:text-base animate-pulse">
+            👆 Vuốt hoặc click mũi tên để xem ảnh
+          </p>
         </div>
 
         {/* Navigation dots */}

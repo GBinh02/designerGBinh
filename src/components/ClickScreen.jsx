@@ -1,126 +1,229 @@
 import React, { useState, useEffect } from 'react';
-import { Gift, Heart, Sparkles } from 'lucide-react';
+import { Sparkles } from 'lucide-react';
 
 const ClickScreen = ({ onNext }) => {
-  const [balloons, setBalloons] = useState([]);
   const [stars, setStars] = useState([]);
-  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [isOpening, setIsOpening] = useState(false);
+  const [isExploded, setIsExploded] = useState(false);
+  const [confettiPieces, setConfettiPieces] = useState([]);
 
   useEffect(() => {
-    // Tạo bóng bay
-    const newBalloons = Array.from({ length: 20 }, (_, i) => ({
-      id: i,
-      left: Math.random() * 100,
-      delay: Math.random() * 3,
-      duration: 4 + Math.random() * 3,
-      color: ['#FF6B9D', '#C44569', '#FFC312', '#00D2FF', '#A29BFE'][Math.floor(Math.random() * 5)]
-    }));
-    setBalloons(newBalloons);
-
     // Tạo ngôi sao
-    const newStars = Array.from({ length: 30 }, (_, i) => ({
+    const newStars = Array.from({ length: 40 }, (_, i) => ({
       id: i,
       left: Math.random() * 100,
       top: Math.random() * 100,
-      delay: Math.random() * 2,
-      size: Math.random() * 20 + 10
+      delay: Math.random() * 3,
+      size: Math.random() * 25 + 15,
+      duration: 2 + Math.random() * 2
     }));
     setStars(newStars);
   }, []);
 
-  const handleNext = () => {
-    if (isTransitioning) return;
+  const handleClick = () => {
+    if (isOpening) return;
     
-    setIsTransitioning(true);
+    setIsOpening(true);
+
+    // Tạo confetti khi mở hộp
+    const confetti = Array.from({ length: 50 }, (_, i) => ({
+      id: i,
+      x: 50,
+      y: 50,
+      angle: (Math.random() * 360),
+      distance: 100 + Math.random() * 200,
+      color: ['#FF6B9D', '#FFC312', '#00D2FF', '#A29BFE', '#FF3838', '#FFD700'][Math.floor(Math.random() * 6)],
+      size: 8 + Math.random() * 12,
+      rotation: Math.random() * 360,
+      delay: Math.random() * 0.3
+    }));
+    setConfettiPieces(confetti);
+
+    // Animation sequence
+    setTimeout(() => {
+      setIsExploded(true);
+    }, 600);
+
     setTimeout(() => {
       onNext();
-    }, 400);
+    }, 1800);
   };
 
   return (
-    <div className={`fixed inset-0 bg-gradient-to-br from-pink-400 via-purple-500 to-indigo-600 flex items-center justify-center overflow-hidden transition-all duration-500 ${isTransitioning ? 'opacity-0 scale-95' : 'opacity-100 scale-100'}`}>
-      {/* Stars background */}
+    <div className="fixed inset-0 bg-gradient-to-br from-pink-500 via-purple-600 to-indigo-700 flex items-center justify-center overflow-hidden">
+      {/* Animated stars background */}
       {stars.map(star => (
         <div
           key={`star-${star.id}`}
-          className="absolute sparkle"
+          className="absolute animate-pulse"
           style={{
             left: `${star.left}%`,
             top: `${star.top}%`,
-            width: `${star.size}px`,
-            height: `${star.size}px`,
-            animationDelay: `${star.delay}s`
+            animationDelay: `${star.delay}s`,
+            animationDuration: `${star.duration}s`
           }}
         >
-          <Sparkles className="text-yellow-300" style={{ width: '100%', height: '100%' }} />
+          <Sparkles 
+            className="text-yellow-300/40" 
+            size={star.size}
+          />
         </div>
       ))}
 
-      {/* Balloons */}
-      {balloons.map(balloon => (
+      {/* Confetti explosion */}
+      {isOpening && confettiPieces.map((piece) => (
         <div
-          key={`balloon-${balloon.id}`}
-          className="absolute bottom-0 animate-bounce"
+          key={`confetti-${piece.id}`}
+          className="absolute w-3 h-3 rounded-full"
           style={{
-            left: `${balloon.left}%`,
-            animationDelay: `${balloon.delay}s`,
-            animationDuration: `${balloon.duration}s`
+            left: '50%',
+            top: '50%',
+            backgroundColor: piece.color,
+            width: `${piece.size}px`,
+            height: `${piece.size}px`,
+            transform: `translate(-50%, -50%)`,
+            animation: `explode-${piece.id} 1.5s ease-out forwards`,
+            animationDelay: `${piece.delay}s`,
+            boxShadow: `0 0 10px ${piece.color}`
           }}
-        >
-          <div
-            className="w-14 h-16 rounded-full relative shadow-lg"
-            style={{
-              background: `linear-gradient(135deg, ${balloon.color} 0%, ${balloon.color}dd 100%)`
-            }}
-          >
-            <div className="absolute bottom-0 left-1/2 w-0.5 h-10 bg-gray-400 transform -translate-x-1/2"></div>
-            <div className="absolute top-2 left-3 w-4 h-4 bg-white/30 rounded-full"></div>
-          </div>
-        </div>
+        />
       ))}
 
-      {/* Main content */}
-      <div className="text-center z-10 px-4 max-w-2xl mx-auto">
-        <div className="mb-6 md:mb-8 float-animation">
-          <Gift className="w-24 h-24 sm:w-32 sm:h-32 text-white mx-auto drop-shadow-2xl" />
-        </div>
-
-        <h1 className="text-3xl sm:text-5xl md:text-7xl font-bold text-white mb-3 md:mb-4 drop-shadow-2xl animate-pulse leading-tight">
-          🎉 HAPPY BIRTHDAY 🎉
-        </h1>
-
-        <p className="text-lg sm:text-xl md:text-2xl text-white/90 mb-6 md:mb-8 drop-shadow-lg px-4">
-          Một món quà đặc biệt dành cho bạn!
-        </p>
-
-        <div className="flex flex-col items-center gap-3 md:gap-4">
-          <Heart className="w-12 h-12 sm:w-16 sm:h-16 text-red-500 heart-pulse" />
+      {/* Main Gift Box */}
+      <div 
+        onClick={handleClick}
+        className={`relative z-10 cursor-pointer ${isOpening ? 'pointer-events-none' : ''}`}
+      >
+        <div className={`relative transform-gpu transition-all duration-500 ${isExploded ? 'opacity-0 scale-150' : ''}`}>
+          {/* Glow effect */}
+          <div className="absolute inset-0 bg-gradient-to-br from-pink-400 to-purple-600 rounded-3xl blur-3xl opacity-60 animate-pulse"></div>
           
-          <button
-            onClick={handleNext}
-            disabled={isTransitioning}
-            className="px-8 py-4 sm:px-12 sm:py-5 bg-white text-purple-600 rounded-full 
-                     text-xl sm:text-2xl font-bold hover:scale-110 active:scale-95
-                     transform transition-all duration-300 shadow-2xl 
-                     hover:shadow-pink-500/50 glow touch-manipulation
-                     disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-          >
-            🎁 Mở Quà Ngay!
-          </button>
-        </div>
-
-        <div className="mt-6 md:mt-8 flex justify-center gap-3 sm:gap-6 flex-wrap">
-          {['🎈', '🎊', '🎁', '🎉', '🎈'].map((emoji, i) => (
-            <span
-              key={i}
-              className="text-3xl sm:text-4xl animate-bounce"
-              style={{ animationDelay: `${i * 0.2}s` }}
+          {/* Gift Box Container */}
+          <div className="relative w-64 h-80 sm:w-80 sm:h-96 md:w-96 md:h-[450px]" style={{ perspective: '1000px' }}>
+            
+            {/* Box Lid - Flies up when opening */}
+            <div 
+              className={`absolute -top-8 sm:-top-10 left-1/2 transform -translate-x-1/2 w-72 sm:w-88 md:w-[420px] h-12 sm:h-16 bg-gradient-to-br from-red-300 via-red-400 to-red-500 rounded-t-2xl shadow-xl transition-all duration-700 ${
+                isOpening ? '-translate-y-96 rotate-45 opacity-0' : ''
+              }`}
+              style={{
+                transformOrigin: 'bottom center',
+                boxShadow: '0 -5px 20px rgba(0, 0, 0, 0.3), inset 0 -5px 10px rgba(0, 0, 0, 0.2)'
+              }}
             >
-              {emoji}
-            </span>
+              <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-16 sm:w-20 h-full bg-gradient-to-r from-yellow-300 via-yellow-400 to-yellow-500"></div>
+            </div>
+
+            {/* Bow - Flies up with lid */}
+            <div className={`absolute -top-20 sm:-top-28 md:-top-32 left-1/2 transform -translate-x-1/2 transition-all duration-700 ${
+              isOpening ? '-translate-y-96 rotate-90 opacity-0' : ''
+            }`}>
+              {/* Center of bow */}
+              <div className="relative w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 bg-gradient-to-br from-yellow-300 via-yellow-400 to-yellow-500 rounded-full shadow-2xl flex items-center justify-center"
+                style={{ boxShadow: '0 10px 30px rgba(0, 0, 0, 0.4), inset -3px -3px 10px rgba(0, 0, 0, 0.2)' }}
+              >
+                <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 bg-gradient-to-br from-yellow-200 to-yellow-300 rounded-full"></div>
+              </div>
+
+              {/* Bow loops */}
+              <div className="absolute top-1/2 -left-16 sm:-left-20 md:-left-24 transform -translate-y-1/2 w-20 h-24 sm:w-24 sm:h-28 md:w-28 md:h-32 bg-gradient-to-br from-yellow-300 to-yellow-500 rounded-full shadow-xl"
+                style={{ clipPath: 'ellipse(45% 50% at 40% 50%)', transform: 'translateY(-50%) rotate(-15deg)' }}
+              ></div>
+              <div className="absolute top-1/2 -right-16 sm:-right-20 md:-right-24 transform -translate-y-1/2 w-20 h-24 sm:w-24 sm:h-28 md:w-28 md:h-32 bg-gradient-to-br from-yellow-300 to-yellow-500 rounded-full shadow-xl"
+                style={{ clipPath: 'ellipse(45% 50% at 60% 50%)', transform: 'translateY(-50%) rotate(15deg)' }}
+              ></div>
+
+              {/* Ribbons */}
+              <div className="absolute top-12 sm:top-16 left-1/2 transform -translate-x-1/2 flex gap-4">
+                <div className="w-3 sm:w-4 h-16 sm:h-20 md:h-24 bg-gradient-to-b from-yellow-400 to-yellow-500 rounded-b-full shadow-lg transform rotate-12"></div>
+                <div className="w-3 sm:w-4 h-16 sm:h-20 md:h-24 bg-gradient-to-b from-yellow-400 to-yellow-500 rounded-b-full shadow-lg transform -rotate-12"></div>
+              </div>
+            </div>
+
+            {/* Box Body - Splits apart when opening */}
+            <div className="absolute inset-0">
+              {/* Left side */}
+              <div className={`absolute left-0 top-0 bottom-0 w-1/2 bg-gradient-to-br from-red-400 via-red-500 to-red-600 transition-all duration-700 ${
+                isOpening ? '-translate-x-full -rotate-45 opacity-0' : ''
+              }`}
+                style={{
+                  boxShadow: 'inset -10px -10px 30px rgba(0, 0, 0, 0.3), 0 20px 60px rgba(0, 0, 0, 0.5)',
+                  borderRadius: '1rem 0 0 1rem'
+                }}
+              >
+                {/* Vertical ribbon left */}
+                <div className="absolute top-0 right-0 w-8 sm:w-10 h-full bg-gradient-to-r from-yellow-300 via-yellow-400 to-yellow-500"
+                  style={{ boxShadow: 'inset -2px 0 10px rgba(0, 0, 0, 0.2)' }}
+                ></div>
+              </div>
+
+              {/* Right side */}
+              <div className={`absolute right-0 top-0 bottom-0 w-1/2 bg-gradient-to-br from-red-400 via-red-500 to-red-600 transition-all duration-700 ${
+                isOpening ? 'translate-x-full rotate-45 opacity-0' : ''
+              }`}
+                style={{
+                  boxShadow: 'inset 10px -10px 30px rgba(0, 0, 0, 0.3), 0 20px 60px rgba(0, 0, 0, 0.5)',
+                  borderRadius: '0 1rem 1rem 0'
+                }}
+              >
+                {/* Vertical ribbon right */}
+                <div className="absolute top-0 left-0 w-8 sm:w-10 h-full bg-gradient-to-r from-yellow-300 via-yellow-400 to-yellow-500"
+                  style={{ boxShadow: 'inset 2px 0 10px rgba(0, 0, 0, 0.2)' }}
+                ></div>
+              </div>
+
+              {/* Horizontal ribbon */}
+              <div className="absolute top-1/2 left-0 transform -translate-y-1/2 w-full h-16 sm:h-20 bg-gradient-to-b from-yellow-300 via-yellow-400 to-yellow-500 shadow-lg pointer-events-none"
+                style={{ boxShadow: 'inset 0 -2px 10px rgba(0, 0, 0, 0.2), inset 0 2px 10px rgba(255, 255, 255, 0.3)' }}
+              >
+                <div className="absolute top-2 left-0 w-full h-2 bg-white/30 blur-sm"></div>
+              </div>
+            </div>
+
+            {/* Surprise content inside - appears when opening */}
+            {isOpening && (
+              <div className="absolute inset-0 flex items-center justify-center animate-pulse">
+                <div className="text-8xl sm:text-9xl animate-bounce">🎉</div>
+              </div>
+            )}
+          </div>
+
+          {/* Sparkles around box */}
+          {!isOpening && [...Array(12)].map((_, i) => (
+            <div
+              key={`sparkle-${i}`}
+              className="absolute animate-ping"
+              style={{
+                left: `${50 + Math.cos((i * 360) / 12 * Math.PI / 180) * 60}%`,
+                top: `${50 + Math.sin((i * 360) / 12 * Math.PI / 180) * 60}%`,
+                animationDelay: `${i * 0.2}s`,
+                animationDuration: '2s'
+              }}
+            >
+              <Sparkles className="text-yellow-300" size={20} />
+            </div>
           ))}
         </div>
       </div>
+
+      {/* Dynamic keyframes for confetti */}
+      <style jsx>{`
+        ${confettiPieces.map((piece) => `
+          @keyframes explode-${piece.id} {
+            0% {
+              transform: translate(-50%, -50%) rotate(0deg);
+              opacity: 1;
+            }
+            100% {
+              transform: translate(
+                calc(-50% + ${Math.cos(piece.angle * Math.PI / 180) * piece.distance}px),
+                calc(-50% + ${Math.sin(piece.angle * Math.PI / 180) * piece.distance}px)
+              ) rotate(${piece.rotation}deg);
+              opacity: 0;
+            }
+          }
+        `).join('')}
+      `}</style>
     </div>
   );
 };
