@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Cake, Wind, RotateCcw, PartyPopper } from 'lucide-react';
+import { Cake, Wind, PartyPopper } from 'lucide-react';
 
-const BirthdayCake = ({ onReset }) => {
+const BirthdayCake = () => {
   const [candlesLit, setCandlesLit] = useState(true);
   const [confetti, setConfetti] = useState([]);
   const [showMessage, setShowMessage] = useState(false);
   const [isBlowing, setIsBlowing] = useState(false);
-  const [isResetting, setIsResetting] = useState(false);
 
   useEffect(() => {
     // Tạo confetti
@@ -49,17 +48,8 @@ const BirthdayCake = ({ onReset }) => {
     setShowMessage(false);
   };
 
-  const handleReset = () => {
-    if (isResetting) return;
-    
-    setIsResetting(true);
-    setTimeout(() => {
-      onReset();
-    }, 300);
-  };
-
   return (
-    <div className={`fixed inset-0 bg-gradient-to-br from-purple-900 via-pink-900 to-red-900 flex items-center justify-center overflow-hidden transition-opacity duration-300 ${isResetting ? 'opacity-0' : 'opacity-100'}`}>
+    <div className="fixed inset-0 bg-gradient-to-br from-purple-900 via-pink-900 to-red-900 flex items-center justify-center overflow-hidden">
       {/* Confetti */}
       {confetti.map((item) => (
         <div
@@ -191,22 +181,24 @@ const BirthdayCake = ({ onReset }) => {
           </div>
         </div>
 
-        {/* Birthday message */}
-        <h2 className="text-3xl sm:text-5xl md:text-7xl font-bold text-white mb-4 sm:mb-6 drop-shadow-2xl animate-pulse leading-tight px-2">
-          🎉 HAPPY BIRTHDAY! 🎉
+        {/* Birthday message với Rainbow effect */}
+        <h2 className="text-2xl sm:text-5xl md:text-7xl font-bold text-white mb-4 sm:mb-6 drop-shadow-2xl leading-tight px-2 rainbow-text">
+          🎉 HAPPY 🎉 BIRTHDAY! 
+          <br />
+          Điệp Anh
         </h2>
 
         {/* Wish message */}
         {showMessage && (
           <div className="mb-4 sm:mb-6 animate-bounce bg-white/20 backdrop-blur-md rounded-xl sm:rounded-2xl p-4 sm:p-6 inline-block">
             <p className="text-xl sm:text-2xl md:text-3xl text-white font-bold drop-shadow-lg">
-              🌟 Ước gì cũng thành hiện thực! 🌟
+              😘 Ước gì cũng thành hiện thực! 🫣
             </p>
           </div>
         )}
 
-        {/* Action buttons */}
-        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center mt-6 sm:mt-8">
+        {/* Action button */}
+        <div className="flex justify-center items-center mt-6 sm:mt-8">
           {candlesLit ? (
             <button
               onClick={handleBlowCandles}
@@ -214,43 +206,30 @@ const BirthdayCake = ({ onReset }) => {
               className="px-8 py-4 sm:px-10 sm:py-5 bg-gradient-to-r from-blue-400 to-cyan-500 text-white rounded-full 
                        text-lg sm:text-xl md:text-2xl font-bold hover:scale-110 active:scale-95
                        transform transition-all duration-300 shadow-2xl glow 
-                       flex items-center gap-2 sm:gap-3 w-full sm:w-auto justify-center
+                       flex items-center gap-2 sm:gap-3 w-full sm:w-auto justify-center max-w-md
                        touch-manipulation disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
             >
               <Wind size={24} className="sm:w-7 sm:h-7" />
-              Thổi Nến
+              Ước Và Thổi Nến Nào!!
             </button>
           ) : (
-            <button
+            <button 
               onClick={handleLightCandles}
               disabled={isBlowing}
               className="px-8 py-4 sm:px-10 sm:py-5 bg-gradient-to-r from-orange-400 to-red-500 text-white rounded-full 
                        text-lg sm:text-xl md:text-2xl font-bold hover:scale-110 active:scale-95
                        transform transition-all duration-300 shadow-2xl glow 
-                       flex items-center gap-2 sm:gap-3 w-full sm:w-auto justify-center
+                       flex items-center gap-2 sm:gap-3 w-full sm:w-auto justify-center max-w-md
                        touch-manipulation disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
             >
               🔥 Thắp Lại Nến
             </button>
           )}
-
-          <button
-            onClick={handleReset}
-            disabled={isResetting}
-            className="px-8 py-4 sm:px-10 sm:py-5 bg-white text-purple-600 rounded-full 
-                     text-lg sm:text-xl md:text-2xl font-bold hover:scale-110 active:scale-95
-                     transform transition-all duration-300 shadow-2xl 
-                     flex items-center gap-2 sm:gap-3 w-full sm:w-auto justify-center
-                     touch-manipulation disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-          >
-            <RotateCcw size={20} className="sm:w-6 sm:h-6" />
-            Chơi Lại
-          </button>
         </div>
 
         {/* Decorative emojis */}
         <div className="mt-6 sm:mt-10 flex justify-center gap-3 sm:gap-6 flex-wrap">
-          {['🎈', '🎊', '🎁', '🎉', '🎀', '🎈', '🎊', '🎁'].map((emoji, i) => (
+          {['🎈', '🎊', '🎁', '🎉', '🎀', '🎈', '🎊'].map((emoji, i) => (
             <span
               key={i}
               className="text-3xl sm:text-4xl md:text-5xl animate-bounce"
@@ -305,6 +284,49 @@ const BirthdayCake = ({ onReset }) => {
           100% {
             transform: translateY(-50px) scale(2);
             opacity: 0;
+          }
+        }
+
+        .confetti {
+          animation: confetti-fall linear forwards;
+        }
+
+        @keyframes confetti-fall {
+          to {
+            transform: translateY(100vh) rotate(720deg);
+            opacity: 0;
+          }
+        }
+
+        .rainbow-text {
+          background: linear-gradient(90deg, #FF6B9D, #FFC312, #00D2FF, #A29BFE, #FF3838, #FFD700);
+          background-size: 200% auto;
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          animation: rainbow-flow 3s linear infinite;
+        }
+
+        @keyframes rainbow-flow {
+          to {
+            background-position: 200% center;
+          }
+        }
+
+        .glow {
+          box-shadow: 0 0 20px rgba(96, 165, 250, 0.5), 0 0 40px rgba(96, 165, 250, 0.3);
+        }
+
+        .float-animation {
+          animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+          0%, 100% {
+            transform: translateY(0px);
+          }
+          50% {
+            transform: translateY(-20px);
           }
         }
       `}</style>

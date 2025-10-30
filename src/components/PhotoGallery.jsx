@@ -12,19 +12,31 @@ const PhotoGallery = ({ onNext }) => {
   const photos = [
     {
       src: './images/photo1.jpg',
-      caption: 'Những khoảnh khắc đẹp đẽ',
+      caption: 'Xinh chưa nàooo',
       bg: 'from-rose-400 to-pink-600',
       icon: '🌟'
     },
     {
       src: './images/photo2.jpg',
-      caption: 'Kỷ niệm khó quên',
+      caption: 'Ai chụp đẹp ta?',
       bg: 'from-blue-400 to-cyan-600',
       icon: '🎈'
     },
     {
       src: './images/photo3.jpg',
-      caption: 'Hạnh phúc mỗi ngày',
+      caption: 'Cười nhiều lên em nhé!',
+      bg: 'from-purple-400 to-indigo-600',
+      icon: '🎊'
+    },
+    {
+      src: './images/photo4.jpg',
+      caption: 'Beautiful Girl!',
+      bg: 'from-blue-400 to-cyan-600',
+      icon: '🎈'
+    },
+    {
+      src: './images/photo5.jpg',
+      caption: 'Tadaaa! Perfect!',
       bg: 'from-purple-400 to-indigo-600',
       icon: '🎊'
     }
@@ -216,7 +228,7 @@ const PhotoGallery = ({ onNext }) => {
         {/* Swipe hint */}
         <div className="text-center mb-4 sm:mb-6">
           <p className="text-white/60 text-sm sm:text-base animate-pulse">
-            👆 Vuốt hoặc click mũi tên để xem ảnh
+            Vuốt vuốt hai bên 
           </p>
         </div>
 
@@ -247,7 +259,7 @@ const PhotoGallery = ({ onNext }) => {
                      flex items-center gap-2 sm:gap-3 mx-auto glow touch-manipulation
                      disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
           >
-            Xem Thiệp Chúc Mừng
+            Nhanh lên!
             <ChevronRight size={20} className="sm:w-6 sm:h-6" />
           </button>
         </div>
