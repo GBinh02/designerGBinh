@@ -6,22 +6,22 @@ const PhotoGallery = ({ onNext }) => {
   const [isAnimating, setIsAnimating] = useState(true);
   const [isTransitioning, setIsTransitioning] = useState(false);
 
-  // Danh sách ảnh
+  // Danh sách ảnh - sử dụng đường dẫn tương đối cho GitHub Pages
   const photos = [
     {
-      src: '/images/photo1.jpg',
+      src: './images/photo1.jpg', // Đường dẫn tương đối
       caption: 'Những khoảnh khắc đẹp đẽ',
       bg: 'from-rose-400 to-pink-600',
       icon: '🌟'
     },
     {
-      src: '/images/photo2.jpg',
+      src: './images/photo2.jpg',
       caption: 'Kỷ niệm khó quên',
       bg: 'from-blue-400 to-cyan-600',
       icon: '🎈'
     },
     {
-      src: '/images/photo3.jpg',
+      src: './images/photo3.jpg',
       caption: 'Hạnh phúc mỗi ngày',
       bg: 'from-purple-400 to-indigo-600',
       icon: '🎊'
@@ -47,8 +47,17 @@ const PhotoGallery = ({ onNext }) => {
     setCurrentPhoto(index);
   };
 
+  const handleNext = () => {
+    if (isTransitioning) return;
+    
+    setIsTransitioning(true);
+    setTimeout(() => {
+      onNext();
+    }, 400);
+  };
+
   return (
-    <div className="fixed inset-0 bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 flex items-center justify-center overflow-hidden">
+    <div className={`fixed inset-0 bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 flex items-center justify-center overflow-hidden transition-all duration-500 ${isTransitioning ? 'opacity-0 scale-95' : 'opacity-100 scale-100'}`}>
       {/* Decorative elements */}
       <div className="absolute inset-0 overflow-hidden">
         {[...Array(20)].map((_, i) => (
@@ -138,11 +147,13 @@ const PhotoGallery = ({ onNext }) => {
         {/* Next button */}
         <div className="text-center">
           <button
-            onClick={onNext}
+            onClick={handleNext}
+            disabled={isTransitioning}
             className="px-8 py-3 sm:px-10 sm:py-4 bg-white text-purple-600 rounded-full font-bold 
                      text-base sm:text-lg hover:scale-110 active:scale-95
                      transform transition-all duration-300 shadow-xl
-                     flex items-center gap-2 sm:gap-3 mx-auto glow touch-manipulation"
+                     flex items-center gap-2 sm:gap-3 mx-auto glow touch-manipulation
+                     disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
           >
             Xem Thiệp Chúc Mừng
             <ChevronRight size={20} className="sm:w-6 sm:h-6" />
